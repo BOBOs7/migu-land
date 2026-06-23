@@ -33,8 +33,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_BASE_PATH: /BOBOs7-migu-land/
-          VITE_SITE_URL: https://BOBOs7.github.io/BOBOs7-migu-land
+          VITE_BASE_PATH: /migu-land/
+          VITE_SITE_URL: https://BOBOs7.github.io/migu-land
 
       - name: Add SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
