@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens 与根目录 DESIGN.md 保持一致（唯一可信源） */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background font-sans text-ink antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    @apply bg-accent-soft text-ink;
+  }
+}
+
+.modal-elastic-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  will-change: transform;
+}
+
+/* HOME 页全程隐藏滚动条（滚轮叙事驱动；About 页不受影响） */
+html.home-active {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-y: none;
+}
+
+html.home-active::-webkit-scrollbar,
+html.home-active body::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .modal-elastic-scroll {
+    will-change: auto;
+  }
+}
