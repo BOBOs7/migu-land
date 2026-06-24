@@ -18,15 +18,51 @@ type HomePageProps = {
 export function HomePage({ lang }: HomePageProps) {
   const total = siteContent.caseStudies.length
   const [modalOpen, setModalOpen] = useState(false)
-  const { enabled, phase, activeIndex, enterWorks } = useHomeStepper(
-    total,
-    modalOpen,
-  )
+  const {
+    enabled,
+    phase,
+    activeIndex,
+    enterHome,
+    enterWorks,
+    enterContact,
+  } = useHomeStepper(total, modalOpen)
 
   useEffect(() => {
     document.documentElement.classList.add('home-active')
     return () => document.documentElement.classList.remove('home-active')
   }, [])
+
+  useEffect(() => {
+    const scrollToSection = (id: string) => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    const onNavigate = (event: Event) => {
+      const target = (event as CustomEvent<{ target?: string }>).detail?.target
+      if (enabled) {
+        if (target === 'home') enterHome()
+        if (target === 'project') enterWorks()
+        if (target === 'contact') enterContact()
+        return
+      }
+
+      if (target === 'home') scrollToSection('hero')
+      if (target === 'project') scrollToSection('works')
+      if (target === 'contact') scrollToSection('skills')
+    }
+
+    window.addEventListener('home:navigate', onNavigate)
+    return () => window.removeEventListener('home:navigate', onNavigate)
+  }, [enabled, enterHome, enterWorks, enterContact])
+
+  useEffect(() => {
+    const target =
+      phase === 'hero' ? 'home' : phase === 'works' ? 'project' : 'contact'
+
+    window.dispatchEvent(
+      new CustomEvent('home:active-nav', { detail: { target } }),
+    )
+  }, [phase])
 
   // 开屏 / 作品阶段锁定原生滚动；末项后释放，outro 由原生滚动接管
   useBodyScrollLock(enabled && phase !== 'outro')

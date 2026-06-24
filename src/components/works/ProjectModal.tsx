@@ -134,33 +134,58 @@ function MediaTile({
 function ModalContent({ blocks, lang }: { blocks: ModalBlock[]; lang: Lang }) {
   const firstHeadingIndex = blocks.findIndex((block) => block.type === 'heading')
   const overviewEnd = firstHeadingIndex === -1 ? blocks.length : firstHeadingIndex
+  const renderedBlocks: React.ReactNode[] = []
 
-  return (
-    <div className="space-y-6">
-      {blocks.map((block, i) => {
+  for (let i = 0; i < blocks.length; i += 1) {
+    const block = blocks[i]
+
+    if (block.type === 'paragraph') {
+      const isOverview = i < overviewEnd
+      const paragraphs = [block.text]
+
+      while (
+        i + 1 < blocks.length &&
+        blocks[i + 1].type === 'paragraph' &&
+        (i + 1 < overviewEnd) === isOverview
+      ) {
+        i += 1
+        const nextBlock = blocks[i]
+        if (nextBlock.type === 'paragraph') paragraphs.push(nextBlock.text)
+      }
+
+      if (isOverview) {
+        renderedBlocks.push(
+          <blockquote
+            key={`paragraph-${i}`}
+            className="max-w-prose space-y-4 border-l-2 border-line pl-4 text-body italic text-ink-muted"
+          >
+            {paragraphs.map((text) => (
+              <p key={text.zh}>{t(text, lang)}</p>
+            ))}
+          </blockquote>,
+        )
+      } else {
+        renderedBlocks.push(
+          <div
+            key={`paragraph-${i}`}
+            className="max-w-prose space-y-4 text-body text-ink-muted"
+          >
+            {paragraphs.map((text) => (
+              <p key={text.zh}>{t(text, lang)}</p>
+            ))}
+          </div>,
+        )
+      }
+      continue
+    }
+
+    renderedBlocks.push(
+      (() => {
         if (block.type === 'heading') {
           return (
             <h3 key={i} className="font-display text-h2 text-ink">
               {t(block.text, lang)}
             </h3>
-          )
-        }
-        if (block.type === 'paragraph') {
-          const isOverview = i < overviewEnd
-          if (isOverview) {
-            return (
-              <blockquote
-                key={i}
-                className="max-w-prose border-l-2 border-line pl-4 text-body italic text-ink-muted"
-              >
-                {t(block.text, lang)}
-              </blockquote>
-            )
-          }
-          return (
-            <p key={i} className="max-w-prose text-body text-ink-muted">
-              {t(block.text, lang)}
-            </p>
           )
         }
         if (block.type === 'list') {
@@ -296,9 +321,11 @@ function ModalContent({ blocks, lang }: { blocks: ModalBlock[]; lang: Lang }) {
           )
         }
         return null
-      })}
-    </div>
-  )
+      })(),
+    )
+  }
+
+  return <div className="space-y-6">{renderedBlocks}</div>
 }
 
 function ProjectBody({ project, lang }: { project: CaseStudy; lang: Lang }) {
@@ -311,9 +338,12 @@ function ProjectBody({ project, lang }: { project: CaseStudy; lang: Lang }) {
         .join(' · ')
 
   const metaRows = [
-    { label: lang === 'zh' ? '类型' : 'TYPE', value: projectType },
-    { label: lang === 'zh' ? '职责' : 'ROLE', value: t(project.role, lang) },
-    { label: lang === 'zh' ? '平台' : 'PLATFORM', value: t(project.platform, lang) },
+    { label: lang === 'zh' ? '游戏类型' : 'GAME TYPE', value: projectType },
+    { label: lang === 'zh' ? '我的职责' : 'MY ROLE', value: t(project.role, lang) },
+    {
+      label: lang === 'zh' ? '游玩平台' : 'PLAY PLATFORM',
+      value: t(project.platform, lang),
+    },
   ] as const
 
   return (

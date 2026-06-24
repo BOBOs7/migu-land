@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { t } from '../../i18n'
 import type { Lang, NavItem } from '../../data/types'
@@ -9,16 +9,17 @@ type HeaderProps = {
   onLangChange: (lang: Lang) => void
 }
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
+const navButtonClass = (active: boolean) =>
   [
     'text-sm font-medium transition-colors',
-    isActive
+    active
       ? 'text-ink underline decoration-accent decoration-2 underline-offset-8'
       : 'text-ink-muted hover:text-ink',
   ].join(' ')
 
 export function Header({ nav, lang, onLangChange }: HeaderProps) {
   const [open, setOpen] = useState(false)
+  const [activeNav, setActiveNav] = useState('home')
   const nextLang: Lang = lang === 'en' ? 'zh' : 'en'
   const toggleLabel = lang === 'en' ? '切换到中文' : 'Switch to English'
   const mobileNavLabel = lang === 'en' ? 'Mobile navigation' : '移动端导航'
@@ -26,21 +27,44 @@ export function Header({ nav, lang, onLangChange }: HeaderProps) {
   const openMenuLabel = lang === 'en' ? 'Open menu' : '打开菜单'
   const closeMenuLabel = lang === 'en' ? 'Close menu' : '关闭菜单'
 
+  const navigateTo = (target: string) => {
+    setActiveNav(target)
+    window.dispatchEvent(
+      new CustomEvent('home:navigate', { detail: { target } }),
+    )
+  }
+
+  useEffect(() => {
+    const onActiveNav = (event: Event) => {
+      const target = (event as CustomEvent<{ target?: string }>).detail?.target
+      if (target) setActiveNav(target)
+    }
+
+    window.addEventListener('home:active-nav', onActiveNav)
+    return () => window.removeEventListener('home:active-nav', onActiveNav)
+  }, [])
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-line bg-background/90 backdrop-blur-sm">
       <div className="flex h-full items-center justify-between px-6 sm:px-10 lg:px-16">
         <NavLink
           to="/"
           className="font-display text-caption font-semibold uppercase tracking-widest text-accent-strong"
+          onClick={() => navigateTo('home')}
         >
           MING.ST
         </NavLink>
 
         <nav className="hidden items-center gap-10 md:flex" aria-label={primaryNavLabel}>
           {nav.map((item) => (
-            <NavLink key={item.id} to={item.path} className={linkClass}>
+            <button
+              key={item.id}
+              type="button"
+              className={navButtonClass(activeNav === item.id)}
+              onClick={() => navigateTo(item.id)}
+            >
               {t(item.label, lang)}
-            </NavLink>
+            </button>
           ))}
           <button
             type="button"
@@ -82,13 +106,16 @@ export function Header({ nav, lang, onLangChange }: HeaderProps) {
           <ul className="flex flex-col gap-5">
             {nav.map((item) => (
               <li key={item.id}>
-                <NavLink
-                  to={item.path}
-                  className={linkClass}
-                  onClick={() => setOpen(false)}
+                <button
+                  type="button"
+                  className={navButtonClass(activeNav === item.id)}
+                  onClick={() => {
+                    navigateTo(item.id)
+                    setOpen(false)
+                  }}
                 >
                   {t(item.label, lang)}
-                </NavLink>
+                </button>
               </li>
             ))}
             <li>

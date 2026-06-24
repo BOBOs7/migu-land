@@ -12,8 +12,10 @@ type UseHomeStepperResult = {
   total: number
   goNext: () => void
   goPrev: () => void
+  enterHome: () => void
   /** 从开屏进入作品阶段 */
   enterWorks: () => void
+  enterContact: () => void
 }
 
 /**
@@ -127,10 +129,27 @@ export function useHomeStepper(total: number, paused = false): UseHomeStepperRes
     advanceBy(-1)
   }, [advanceBy])
 
+  const enterHome = useCallback(() => {
+    accumRef.current = 0
+    setStep(0)
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }, [])
+
   const enterWorks = useCallback(() => {
     accumRef.current = 0
-    setStep((s) => (s === 0 ? 1 : s))
-  }, [])
+    setStep(total > 0 ? 1 : 0)
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }, [total])
+
+  const enterContact = useCallback(() => {
+    accumRef.current = 0
+    setStep(outroStep)
+    engageBoundaryLock()
+  }, [outroStep, engageBoundaryLock])
 
   useEffect(() => {
     if (!enabled || paused) return
@@ -304,5 +323,15 @@ export function useHomeStepper(total: number, paused = false): UseHomeStepperRes
   const phase: HomePhase = step === 0 ? 'hero' : step <= total ? 'works' : 'outro'
   const activeIndex = Math.max(0, Math.min(total - 1, step - 1))
 
-  return { enabled, phase, activeIndex, total, goNext, goPrev, enterWorks }
+  return {
+    enabled,
+    phase,
+    activeIndex,
+    total,
+    goNext,
+    goPrev,
+    enterHome,
+    enterWorks,
+    enterContact,
+  }
 }

@@ -10,10 +10,10 @@ export const siteContent: SiteContent = {
   },
 
   profile: {
-    name: loc('Hi! 我是明月。', 'Hi! I\'m Mingyue.'),
+    name: loc('Hi! 我是Mingyue', 'Hi! I\'m Mingyue.'),
     nameEn: 'Hi! I\'m Mingyue.',
     tagline: loc(
-      '游戏交互设计师。',
+      '一个游戏交互设计师，不止于交互设计。',
       'A GAME INTERACTION DESIGNER.',
     ),
     tags: [
@@ -27,7 +27,11 @@ export const siteContent: SiteContent = {
     avatarSrc: '/assets/profile.png',
   },
 
-  nav: [{ id: 'home', label: loc('首页', 'HOME'), path: '/' }],
+  nav: [
+    { id: 'home', label: loc('HOME', 'HOME'), path: '/' },
+    { id: 'project', label: loc('PROJECT', 'PROJECT'), path: '#works' },
+    { id: 'contact', label: loc('CONTACT', 'CONTACT'), path: '#contact' },
+  ],
 
   caseStudies: [
     {
@@ -103,7 +107,7 @@ export const siteContent: SiteContent = {
       id: 'higame',
       category: 'work',
       title: loc('Project HI'),
-      tagLabel: loc('交互设计/UE引擎/全平台', 'Interaction Design / Unreal Engine / All Platforms'),
+      tagLabel: loc('交互设计/UE引擎/全平台', 'UX Design / Unreal Engine / All Platforms'),
       status: 'nda',
       cardIntro: loc(
         '在研模拟经营 RPG 全平台游戏，负责核心系统、大世界探索、任务叙事与小型玩法等多模块的 PC/主机端交互设计。',
@@ -115,7 +119,7 @@ export const siteContent: SiteContent = {
       platform: loc('全平台', 'All Platforms'),
       period: '2024.11 – 2026.5',
       year: '2026',
-      role: loc('交互策划', 'Interaction Designer'),
+      role: loc('交互策划', 'UX Designer'),
       sortOrder: 2,
       desensitized: true,
       modalBlocks: [
@@ -244,7 +248,7 @@ export const siteContent: SiteContent = {
       platform: loc('PC 端', 'PC'),
       period: '2026.2 – 2026.5',
       year: '2026',
-      role: loc('系统 / 交互 / 动效', 'Systems / Interaction / Motion'),
+      role: loc('系统 / 交互 / 动效', 'Systems / UX / Motion'),
       sortOrder: 3,
       desensitized: false,
       modalBlocks: [
@@ -697,7 +701,7 @@ export const siteContent: SiteContent = {
   ],
 
   skillsIntro: loc(
-    '设计、交互与动效。',
+    'Design, interaction, and motion.',
     'Design, interaction, and motion.',
   ),
 
