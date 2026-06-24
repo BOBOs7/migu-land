@@ -7,7 +7,7 @@ import { SkillsContactSection } from '../components/home/SkillsContactSection'
 import { WorksSection } from '../components/works/WorksSection'
 import type { Lang } from '../data/types'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
-import { useHomeStepper } from '../hooks/useHomeStepper'
+import { useHomeStepper, type HomePhase } from '../hooks/useHomeStepper'
 
 const phaseTransition = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const }
 
@@ -67,6 +67,12 @@ export function HomePage({ lang }: HomePageProps) {
   // 开屏 / 作品阶段锁定原生滚动；末项后释放，outro 由原生滚动接管
   useBodyScrollLock(enabled && phase !== 'outro')
 
+  // 刷新/首次加载时强制复位到顶部，避免浏览器恢复滚动位置导致 hero 与下方内容重叠
+  useEffect(() => {
+    if (!enabled) return
+    window.scrollTo({ top: 0 })
+  }, [enabled])
+
   // phase 切换兜底：works → outro 时主动滚到 outro 起点（占位高度 = 100dvh）；
   // outro → works/hero 时把页面复位到顶部，避免被 fixed 舞台覆盖时停在 outro 中段。
   const prevPhaseRef = useRef(phase)
@@ -88,15 +94,23 @@ export function HomePage({ lang }: HomePageProps) {
     }
   }, [enabled, phase])
 
-  // 用于跨阶段入场动画判断：
-  // - wasOutroRef：从 outro 回到 stage 时，让 stage 从顶部下滑覆盖（C→B 视觉上 outro 向下消失）
-  // - hasNavigatedRef：B→A 时让 hero 从下方滑入；首次加载 hero 不动画
+  // 动画来源追踪：
+  // - wasOutroRef：从 outro 回到 stage 时，让 stage 从顶部下滑覆盖
+  // - heroFromRef：进入 hero 时的来源 — 'init'（首次轻量）、'works'（完整下滑）、'outro'（同下滑）
   const wasOutroRef = useRef(false)
-  const hasNavigatedRef = useRef(false)
+  const heroFromRef = useRef<'init' | 'works' | 'outro'>('init')
+  const prevPhaseForHeroRef = useRef<HomePhase>('hero')
+
   useEffect(() => {
+    if (!enabled) return
+    const prev = prevPhaseForHeroRef.current
+    prevPhaseForHeroRef.current = phase
+    if (prev === phase) return
+    if (phase === 'hero') {
+      heroFromRef.current = prev === 'works' || prev === 'outro' ? 'works' : 'init'
+    }
     if (phase === 'outro') wasOutroRef.current = true
-    if (phase !== 'hero') hasNavigatedRef.current = true
-  }, [phase])
+  }, [enabled, phase])
 
   // 降级：reduced-motion 时走普通可滚动文档
   if (!enabled) {
@@ -165,7 +179,9 @@ export function HomePage({ lang }: HomePageProps) {
                   key="hero"
                   className="h-full"
                   initial={
-                    hasNavigatedRef.current ? { opacity: 0, y: 48 } : false
+                    heroFromRef.current === 'init'
+                      ? { opacity: 0, y: -24 }
+                      : { y: '-100%' }
                   }
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -48 }}

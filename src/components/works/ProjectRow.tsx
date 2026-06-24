@@ -158,12 +158,9 @@ export function ProjectRow({
         <ProjectTags
           label={project.tagLabel}
           lang={lang}
-          className="hidden shrink-0 flex-wrap items-center justify-end gap-1 lg:flex lg:max-w-[14rem]"
+          size="md"
+          className="ml-auto hidden min-w-0 shrink-0 flex-wrap items-center justify-end gap-1.5 sm:flex sm:max-w-[24rem]"
         />
-
-        <span className="w-12 shrink-0 text-right text-caption tabular-nums text-ink-muted">
-          {project.year}
-        </span>
       </button>
     </motion.div>
   )

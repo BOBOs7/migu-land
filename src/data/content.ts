@@ -334,7 +334,7 @@ export const siteContent: SiteContent = {
       period: '2022.11',
       year: '2022',
       role: loc('交互 / 视觉 / 动画', 'Interaction / Visuals / Animation'),
-      sortOrder: 5,
+      sortOrder: 7,
       desensitized: false,
       externalUrl: 'https://zjliuzj.itch.io/tetris-factory',
       modalBlocks: [
@@ -389,7 +389,7 @@ export const siteContent: SiteContent = {
       period: '2022.1 – 2022.5',
       year: '2022',
       role: loc('美术 / 交互 /关卡', 'Art / Interaction / Level Design'),
-      sortOrder: 6,
+      sortOrder: 5,
       desensitized: false,
       externalUrl: 'https://zjliuzj.itch.io/dreamconnection',
       modalBlocks: [
@@ -610,7 +610,7 @@ export const siteContent: SiteContent = {
       period: '2022.10 – 2023.1',
       year: '2023',
       role: loc('独立创作', 'Solo Creator'),
-      sortOrder: 7,
+      sortOrder: 6,
       desensitized: false,
       modalBlocks: [
         {

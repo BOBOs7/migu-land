@@ -73,9 +73,9 @@ export function Header({ nav, lang, onLangChange }: HeaderProps) {
             title={toggleLabel}
             onClick={() => onLangChange(nextLang)}
           >
-            <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
-            <span aria-hidden> / </span>
             <span className={lang === 'en' ? 'text-ink' : undefined}>EN</span>
+            <span aria-hidden> / </span>
+            <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
           </button>
         </nav>
 
@@ -128,9 +128,9 @@ export function Header({ nav, lang, onLangChange }: HeaderProps) {
                   setOpen(false)
                 }}
               >
-                <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
-                <span aria-hidden> / </span>
                 <span className={lang === 'en' ? 'text-ink' : undefined}>EN</span>
+                <span aria-hidden> / </span>
+                <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
               </button>
             </li>
           </ul>

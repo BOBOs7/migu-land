@@ -20,9 +20,9 @@ describe('siteContent', () => {
       'higame',
       'guru-cafe',
       'bird-voyage',
-      'tetris-factory',
       'dream-connection',
       'reika',
+      'tetris-factory',
     ])
   })
 

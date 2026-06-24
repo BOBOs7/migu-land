@@ -96,7 +96,7 @@ export function Gallery({ images, lang }: GalleryProps) {
         </div>
       )}
 
-      <Lightbox
+      <ImageLightbox
         open={lightbox}
         images={images}
         index={safeIndex}
@@ -108,7 +108,7 @@ export function Gallery({ images, lang }: GalleryProps) {
   )
 }
 
-type LightboxProps = {
+type ImageLightboxProps = {
   open: boolean
   images: GalleryImage[]
   index: number
@@ -117,14 +117,14 @@ type LightboxProps = {
   lang: Lang
 }
 
-function Lightbox({
+export function ImageLightbox({
   open,
   images,
   index,
   onIndexChange,
   onClose,
   lang,
-}: LightboxProps) {
+}: ImageLightboxProps) {
   const reduced = useReducedMotion()
   useBodyScrollLock(open)
 

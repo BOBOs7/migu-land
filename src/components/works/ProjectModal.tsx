@@ -1,13 +1,13 @@
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { t } from '../../i18n'
-import type { CaseStudy, Lang, MediaItem, ModalBlock } from '../../data/types'
+import type { CaseStudy, GalleryImage, Lang, MediaItem, ModalBlock } from '../../data/types'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useElasticOverscroll } from '../../hooks/useElasticOverscroll'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { publicAsset } from '../../lib/publicAsset'
-import { Gallery } from './Gallery'
+import { Gallery, ImageLightbox } from './Gallery'
 
 type ProjectModalProps = {
   projects: CaseStudy[]
@@ -67,7 +67,11 @@ function extractBilibiliBvid(url: string): string | null {
 
 function getVideoEmbedSrc(url: string): string | null {
   const youtubeId = extractYouTubeId(url)
-  if (youtubeId) return `https://www.youtube.com/embed/${youtubeId}`
+  if (youtubeId) {
+    const origin =
+      typeof window === 'undefined' ? '' : `?origin=${window.location.origin}`
+    return `https://www.youtube.com/embed/${youtubeId}${origin}`
+  }
 
   const bvid = extractBilibiliBvid(url)
   if (bvid) {
@@ -128,6 +132,41 @@ function MediaTile({
         <source src={publicAsset(item.mp4)} type="video/mp4" />
       </video>
     </div>
+  )
+}
+
+function SingleImageBlock({ block, lang }: { block: { type: 'image'; src: string; alt: { zh: string; en: string } }; lang: Lang }) {
+  const [lightbox, setLightbox] = useState(false)
+  const image: GalleryImage = { src: block.src, alt: block.alt }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setLightbox(true)}
+        className="block w-full cursor-pointer outline-none transition focus-visible:ring-2 focus-visible:ring-accent rounded-card"
+        aria-label={
+          lang === 'zh'
+            ? `查看原图：${t(block.alt, lang)}`
+            : `View full image: ${t(block.alt, lang)}`
+        }
+      >
+        <img
+          src={publicAsset(block.src)}
+          alt={t(block.alt, lang)}
+          className="w-full rounded-card border border-line"
+          loading="lazy"
+        />
+      </button>
+      <ImageLightbox
+        open={lightbox}
+        images={[image]}
+        index={0}
+        onIndexChange={() => {}}
+        onClose={() => setLightbox(false)}
+        lang={lang}
+      />
+    </>
   )
 }
 
@@ -211,13 +250,7 @@ function ModalContent({ blocks, lang }: { blocks: ModalBlock[]; lang: Lang }) {
         }
         if (block.type === 'image') {
           return (
-            <img
-              key={i}
-              src={publicAsset(block.src)}
-              alt={t(block.alt, lang)}
-              className="w-full rounded-card border border-line"
-              loading="lazy"
-            />
+            <SingleImageBlock key={i} block={block} lang={lang} />
           )
         }
         if (block.type === 'video') {
@@ -232,7 +265,7 @@ function ModalContent({ blocks, lang }: { blocks: ModalBlock[]; lang: Lang }) {
                     title={title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
-                    referrerPolicy="no-referrer"
+                    referrerPolicy="strict-origin-when-cross-origin"
                     className="absolute inset-0 h-full w-full"
                   />
                 ) : (
