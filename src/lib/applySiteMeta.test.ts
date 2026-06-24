@@ -10,15 +10,15 @@ describe('applySiteMeta', () => {
   })
 
   it('resolveOgImageUrl keeps relative path without baseUrl', () => {
-    expect(resolveOgImageUrl('/assets/cover/cover-sn.png')).toBe(
-      '/assets/cover/cover-sn.png',
+    expect(resolveOgImageUrl('/assets/cover/cover-ogimg.png')).toBe(
+      '/assets/cover/cover-ogimg.png',
     )
   })
 
   it('resolveOgImageUrl builds absolute URL with baseUrl', () => {
     expect(
-      resolveOgImageUrl('/assets/cover/cover-sn.png', 'https://example.com'),
-    ).toBe('https://example.com/assets/cover/cover-sn.png')
+      resolveOgImageUrl('/assets/cover/cover-ogimg.png', 'https://example.com'),
+    ).toBe('https://example.com/assets/cover/cover-ogimg.png')
   })
 
   it('buildMetaTagsHtml includes title and og tags from content.ts', () => {

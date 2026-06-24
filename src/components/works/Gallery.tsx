@@ -3,12 +3,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { t } from '../../i18n'
 import { publicAsset } from '../../lib/publicAsset'
-import type { GalleryImage } from '../../data/types'
+import type { GalleryImage, Lang } from '../../data/types'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 type GalleryProps = {
   images: GalleryImage[]
+  lang: Lang
 }
 
 /**
@@ -16,7 +17,7 @@ type GalleryProps = {
  * 主图区使用固定 16:10 容器 + object-cover 统一裁切，避免不同原图比例导致行高不一；
  * 原图全貌通过 lightbox（object-contain）查看。多 gallery 在同一弹窗中各自维护独立选中态。
  */
-export function Gallery({ images }: GalleryProps) {
+export function Gallery({ images, lang }: GalleryProps) {
   const reduced = useReducedMotion()
   const [active, setActive] = useState(0)
   const [lightbox, setLightbox] = useState(false)
@@ -38,14 +39,18 @@ export function Gallery({ images }: GalleryProps) {
         type="button"
         onClick={() => setLightbox(true)}
         className="block w-full overflow-hidden rounded-card border border-line bg-surface outline-none transition focus-visible:ring-2 focus-visible:ring-accent"
-        aria-label={`查看原图：${t(current.alt)}`}
+        aria-label={
+          lang === 'zh'
+            ? `查看原图：${t(current.alt, lang)}`
+            : `View full image: ${t(current.alt, lang)}`
+        }
       >
         <div className="relative w-full overflow-hidden bg-ink/[0.04]" style={{ aspectRatio: '16 / 10' }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.img
               key={current.src}
               src={publicAsset(current.src)}
-              alt={t(current.alt)}
+              alt={t(current.alt, lang)}
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
               initial={reduced ? false : { opacity: 0 }}
@@ -66,7 +71,11 @@ export function Gallery({ images }: GalleryProps) {
                 key={img.src + i}
                 type="button"
                 onClick={() => setActive(i)}
-                aria-label={`切换到第 ${i + 1} 张：${t(img.alt)}`}
+                aria-label={
+                  lang === 'zh'
+                    ? `切换到第 ${i + 1} 张：${t(img.alt, lang)}`
+                    : `Switch to image ${i + 1}: ${t(img.alt, lang)}`
+                }
                 aria-pressed={isActive}
                 className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-md border outline-none transition focus-visible:ring-2 focus-visible:ring-accent ${
                   isActive
@@ -93,6 +102,7 @@ export function Gallery({ images }: GalleryProps) {
         index={safeIndex}
         onIndexChange={setActive}
         onClose={() => setLightbox(false)}
+        lang={lang}
       />
     </div>
   )
@@ -104,9 +114,17 @@ type LightboxProps = {
   index: number
   onIndexChange: (i: number) => void
   onClose: () => void
+  lang: Lang
 }
 
-function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps) {
+function Lightbox({
+  open,
+  images,
+  index,
+  onIndexChange,
+  onClose,
+  lang,
+}: LightboxProps) {
   const reduced = useReducedMotion()
   useBodyScrollLock(open)
 
@@ -157,12 +175,12 @@ function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps
           transition={{ duration: reduced ? 0 : 0.18 }}
           role="dialog"
           aria-modal="true"
-          aria-label="原图查看"
+          aria-label={lang === 'zh' ? '原图查看' : 'Full image viewer'}
         >
           <button
             type="button"
             className="absolute inset-0 bg-ink/85 backdrop-blur-sm"
-            aria-label="关闭原图"
+            aria-label={lang === 'zh' ? '关闭原图' : 'Close full image'}
             onClick={onClose}
           />
 
@@ -170,7 +188,7 @@ function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps
             <motion.img
               key={image.src}
               src={publicAsset(image.src)}
-              alt={t(image.alt)}
+              alt={t(image.alt, lang)}
               className="relative z-10 max-h-[90vh] max-w-[92vw] rounded-md object-contain shadow-float"
               initial={reduced ? false : { opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -187,7 +205,7 @@ function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps
                 e.stopPropagation()
                 goPrev()
               }}
-              aria-label="上一张"
+              aria-label={lang === 'zh' ? '上一张' : 'Previous image'}
               className="group absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-background/30 bg-background/10 text-background backdrop-blur transition hover:bg-background/20 sm:left-6 sm:h-12 sm:w-12"
             >
               <span aria-hidden className="text-xl leading-none">‹</span>
@@ -200,7 +218,7 @@ function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps
                 e.stopPropagation()
                 goNext()
               }}
-              aria-label="下一张"
+              aria-label={lang === 'zh' ? '下一张' : 'Next image'}
               className="group absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-background/30 bg-background/10 text-background backdrop-blur transition hover:bg-background/20 sm:right-6 sm:h-12 sm:w-12"
             >
               <span aria-hidden className="text-xl leading-none">›</span>
@@ -212,7 +230,7 @@ function Lightbox({ open, images, index, onIndexChange, onClose }: LightboxProps
             onClick={onClose}
             className="absolute right-4 top-4 z-20 rounded-btn border border-background/30 bg-background/10 px-3 py-1.5 text-sm text-background backdrop-blur transition hover:bg-background/20"
           >
-            关闭
+            {lang === 'zh' ? '关闭' : 'Close'}
           </button>
 
           {images.length > 1 && (

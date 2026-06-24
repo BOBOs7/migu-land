@@ -6,13 +6,14 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { CaseStudy } from '../../data/types'
+import type { CaseStudy, Lang } from '../../data/types'
 import { getSortedCaseStudies } from '../../data/validate'
 import { ProjectRow, type RowState } from './ProjectRow'
 import { ProjectModal } from './ProjectModal'
 
 type WorksSectionProps = {
   caseStudies: CaseStudy[]
+  lang: Lang
   /** 滚轮驱动的当前选中索引（劫持模式） */
   activeIndex: number
   /** reduced-motion / 降级模式：渲染普通可滚动列表 */
@@ -46,16 +47,16 @@ function getRowState(i: number, activeIndex: number): RowState {
   return i < activeIndex ? 'reached' : 'upcoming'
 }
 
-const categoryHeading: Record<CaseStudy['category'], string> = {
-  work: '工作项目',
-  personal: '个人项目',
+const categoryHeading: Record<CaseStudy['category'], Record<Lang, string>> = {
+  work: { zh: '工作项目', en: 'Work Projects' },
+  personal: { zh: '个人项目', en: 'Personal Projects' },
 }
 
 type ListEntry =
   | { kind: 'separator'; id: string; label: string }
   | { kind: 'project'; project: CaseStudy; index: number }
 
-function buildListEntries(caseStudies: CaseStudy[]): ListEntry[] {
+function buildListEntries(caseStudies: CaseStudy[], lang: Lang): ListEntry[] {
   const entries: ListEntry[] = []
   let lastCategory: CaseStudy['category'] | null = null
 
@@ -64,7 +65,7 @@ function buildListEntries(caseStudies: CaseStudy[]): ListEntry[] {
       entries.push({
         kind: 'separator',
         id: `sep-${project.category}`,
-        label: categoryHeading[project.category],
+        label: categoryHeading[project.category][lang],
       })
       lastCategory = project.category
     }
@@ -89,12 +90,13 @@ function CategorySeparator({ label }: { label: string }) {
 
 export function WorksSection({
   caseStudies,
+  lang,
   activeIndex,
   reduced,
   onModalOpenChange,
 }: WorksSectionProps) {
   const sorted = useMemo(() => getSortedCaseStudies(caseStudies), [caseStudies])
-  const listEntries = useMemo(() => buildListEntries(sorted), [sorted])
+  const listEntries = useMemo(() => buildListEntries(sorted, lang), [sorted, lang])
 
   const [open, setOpen] = useState(false)
   const [modalIndex, setModalIndex] = useState(0)
@@ -150,9 +152,13 @@ export function WorksSection({
     return (
       <div id="works">
         <header className="mb-10">
-          <h2 className="font-display text-h2 text-ink">作品</h2>
+          <h2 className="font-display text-h2 text-ink">
+            {lang === 'zh' ? '作品' : 'Works'}
+          </h2>
           <p className="mt-4 max-w-xl text-body text-ink-muted">
-            2 个工作项目与 5 个个人项目。点击查看详情。
+            {lang === 'zh'
+              ? '2 个工作项目与 5 个个人项目。点击查看详情。'
+              : '2 work projects and 5 personal projects. Click to view details.'}
           </p>
         </header>
         <ul className="divide-y divide-line border-y border-line">
@@ -164,6 +170,7 @@ export function WorksSection({
                 <ProjectRow
                   project={entry.project}
                   index={entry.index}
+                  lang={lang}
                   state="reached"
                   reduced
                   onOpen={() => openAt(entry.index)}
@@ -179,6 +186,7 @@ export function WorksSection({
           onClose={close}
           onPrev={goPrev}
           onNext={goNext}
+          lang={lang}
         />
       </div>
     )
@@ -221,6 +229,7 @@ export function WorksSection({
                 <ProjectRow
                   project={project}
                   index={index}
+                  lang={lang}
                   state={state}
                   reduced={false}
                   onOpen={() => openAt(index)}
@@ -238,6 +247,7 @@ export function WorksSection({
         onClose={close}
         onPrev={goPrev}
         onNext={goNext}
+        lang={lang}
       />
     </div>
   )

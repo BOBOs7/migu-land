@@ -79,7 +79,7 @@ export type CaseStudy = {
 export type SkillGroup = {
   id: string
   title: LocalizedString
-  items: string[]
+  items: Array<string | LocalizedString>
 }
 
 export type Contact = {

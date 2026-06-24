@@ -5,12 +5,17 @@ import { HeroSection } from '../components/home/HeroSection'
 import { StarBackground } from '../components/home/StarBackground'
 import { SkillsContactSection } from '../components/home/SkillsContactSection'
 import { WorksSection } from '../components/works/WorksSection'
+import type { Lang } from '../data/types'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { useHomeStepper } from '../hooks/useHomeStepper'
 
 const phaseTransition = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const }
 
-export function HomePage() {
+type HomePageProps = {
+  lang: Lang
+}
+
+export function HomePage({ lang }: HomePageProps) {
   const total = siteContent.caseStudies.length
   const [modalOpen, setModalOpen] = useState(false)
   const { enabled, phase, activeIndex, enterWorks } = useHomeStepper(
@@ -63,12 +68,13 @@ export function HomePage() {
       <main className="relative">
         <StarBackground />
         <section className="relative z-10 min-h-[100dvh] border-b border-line">
-          <HeroSection profile={siteContent.profile} />
+          <HeroSection profile={siteContent.profile} lang={lang} />
         </section>
         <section className="relative z-10 border-b border-line py-24 md:py-32">
           <div className="mx-auto max-w-content px-6">
             <WorksSection
               caseStudies={siteContent.caseStudies}
+              lang={lang}
               activeIndex={0}
               reduced
               onModalOpenChange={setModalOpen}
@@ -81,6 +87,7 @@ export function HomePage() {
               intro={siteContent.skillsIntro}
               skills={siteContent.skills}
               contact={siteContent.contact}
+              lang={lang}
             />
           </div>
         </section>
@@ -101,6 +108,7 @@ export function HomePage() {
             intro={siteContent.skillsIntro}
             skills={siteContent.skills}
             contact={siteContent.contact}
+            lang={lang}
           />
         </div>
       </section>
@@ -129,6 +137,7 @@ export function HomePage() {
                 >
                   <HeroSection
                     profile={siteContent.profile}
+                    lang={lang}
                     onEnterWorks={enterWorks}
                   />
                 </motion.div>
@@ -143,6 +152,7 @@ export function HomePage() {
                 >
                   <WorksSection
                     caseStudies={siteContent.caseStudies}
+                    lang={lang}
                     activeIndex={activeIndex}
                     reduced={false}
                     onModalOpenChange={setModalOpen}

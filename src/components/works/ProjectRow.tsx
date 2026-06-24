@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { t } from '../../i18n'
 import { publicAsset } from '../../lib/publicAsset'
-import type { CaseStudy } from '../../data/types'
+import type { CaseStudy, Lang } from '../../data/types'
 import { ProjectTags } from './ProjectTags'
 
 export type RowState = 'reached' | 'active' | 'upcoming'
@@ -9,14 +9,15 @@ export type RowState = 'reached' | 'active' | 'upcoming'
 type ProjectRowProps = {
   project: CaseStudy
   index: number
+  lang: Lang
   state: RowState
   reduced: boolean
   onOpen: () => void
 }
 
-const categoryLabel: Record<CaseStudy['category'], string> = {
-  work: '工作项目',
-  personal: '个人项目',
+const categoryLabel: Record<CaseStudy['category'], Record<Lang, string>> = {
+  work: { zh: '工作项目', en: 'Work Project' },
+  personal: { zh: '个人项目', en: 'Personal Project' },
 }
 
 function pad(n: number) {
@@ -32,6 +33,7 @@ function pad(n: number) {
 export function ProjectRow({
   project,
   index,
+  lang,
   state,
   reduced,
   onOpen,
@@ -46,13 +48,17 @@ export function ProjectRow({
           type="button"
           onClick={onOpen}
           className="block w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-          aria-label={`查看 ${t(project.title)} 详情`}
+          aria-label={
+            lang === 'zh'
+              ? `查看 ${t(project.title, lang)} 详情`
+              : `View details for ${t(project.title, lang)}`
+          }
         >
           <div className="grid items-stretch gap-0 md:min-h-[18rem] md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
             <div className="relative aspect-[16/10] min-w-0 overflow-hidden border-b border-line md:aspect-auto md:border-b-0 md:border-r">
               <img
                 src={publicAsset(project.coverSrc)}
-                alt={t(project.title)}
+                alt={t(project.title, lang)}
                 className="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
               />
@@ -62,19 +68,21 @@ export function ProjectRow({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-ink-muted">
                 <span className="tabular-nums">{pad(index)}</span>
                 <span aria-hidden>·</span>
-                <span>{categoryLabel[project.category]}</span>
+                <span>{categoryLabel[project.category][lang]}</span>
                 <span aria-hidden>·</span>
                 <span className="tabular-nums">{project.year}</span>
               </div>
 
               <h3 className="mt-2 break-words font-display text-h2 leading-tight text-ink">
-                {t(project.title)}
+                {t(project.title, lang)}
               </h3>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <ProjectTags label={project.tagLabel} />
+                <ProjectTags label={project.tagLabel} lang={lang} />
                 {project.desensitized && (
-                  <span className="text-caption text-ink-muted">已脱敏</span>
+                  <span className="text-caption text-ink-muted">
+                    {lang === 'zh' ? '已脱敏' : 'Redacted'}
+                  </span>
                 )}
               </div>
 
@@ -89,12 +97,12 @@ export function ProjectRow({
                   }}
                   className="mt-4 max-w-prose text-body text-ink-muted"
                 >
-                  {t(project.cardIntro)}
+                  {t(project.cardIntro, lang)}
                 </motion.p>
               </AnimatePresence>
 
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-strong">
-                查看详情
+                {lang === 'zh' ? '查看详情' : 'View details'}
                 <span aria-hidden>→</span>
               </span>
             </div>
@@ -144,11 +152,12 @@ export function ProjectRow({
             isUpcoming ? 'text-lead' : 'text-lead-lg'
           } text-ink`}
         >
-          {t(project.title)}
+          {t(project.title, lang)}
         </span>
 
         <ProjectTags
           label={project.tagLabel}
+          lang={lang}
           className="hidden shrink-0 flex-wrap items-center justify-end gap-1 lg:flex lg:max-w-[14rem]"
         />
 

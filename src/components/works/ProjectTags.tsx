@@ -1,11 +1,11 @@
 import { t } from '../../i18n'
-import type { LocalizedString } from '../../data/types'
+import type { Lang, LocalizedString } from '../../data/types'
 
 const tagClass =
   'rounded-sm bg-accent-soft px-2.5 py-0.5 text-caption text-accent-strong'
 
-function splitTagLabel(label: LocalizedString): string[] {
-  return t(label)
+function splitTagLabel(label: LocalizedString, lang: Lang): string[] {
+  return t(label, lang)
     .split('/')
     .map((part) => part.trim())
     .filter(Boolean)
@@ -13,11 +13,12 @@ function splitTagLabel(label: LocalizedString): string[] {
 
 type ProjectTagsProps = {
   label: LocalizedString
+  lang: Lang
   className?: string
 }
 
-export function ProjectTags({ label, className }: ProjectTagsProps) {
-  const tags = splitTagLabel(label)
+export function ProjectTags({ label, lang, className }: ProjectTagsProps) {
+  const tags = splitTagLabel(label, lang)
 
   return (
     <span className={className ?? 'flex flex-wrap items-center gap-2'}>

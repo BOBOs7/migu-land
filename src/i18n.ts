@@ -1,6 +1,6 @@
 import type { Lang, LocalizedString } from './data/types'
 
-export const defaultLang: Lang = 'zh'
+export const defaultLang: Lang = 'en'
 
 export function t(field: LocalizedString, lang: Lang = defaultLang): string {
   const value = field[lang]?.trim()

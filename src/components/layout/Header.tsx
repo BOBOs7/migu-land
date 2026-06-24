@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { t } from '../../i18n'
-import type { NavItem } from '../../data/types'
+import type { Lang, NavItem } from '../../data/types'
 
 type HeaderProps = {
   nav: NavItem[]
+  lang: Lang
+  onLangChange: (lang: Lang) => void
 }
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -15,8 +17,14 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
       : 'text-ink-muted hover:text-ink',
   ].join(' ')
 
-export function Header({ nav }: HeaderProps) {
+export function Header({ nav, lang, onLangChange }: HeaderProps) {
   const [open, setOpen] = useState(false)
+  const nextLang: Lang = lang === 'en' ? 'zh' : 'en'
+  const toggleLabel = lang === 'en' ? '切换到中文' : 'Switch to English'
+  const mobileNavLabel = lang === 'en' ? 'Mobile navigation' : '移动端导航'
+  const primaryNavLabel = lang === 'en' ? 'Primary navigation' : '主导航'
+  const openMenuLabel = lang === 'en' ? 'Open menu' : '打开菜单'
+  const closeMenuLabel = lang === 'en' ? 'Close menu' : '关闭菜单'
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-line bg-background/90 backdrop-blur-sm">
@@ -28,25 +36,29 @@ export function Header({ nav }: HeaderProps) {
           MING.ST
         </NavLink>
 
-        <nav className="hidden items-center gap-10 md:flex" aria-label="主导航">
+        <nav className="hidden items-center gap-10 md:flex" aria-label={primaryNavLabel}>
           {nav.map((item) => (
             <NavLink key={item.id} to={item.path} className={linkClass}>
-              {t(item.label)}
+              {t(item.label, lang)}
             </NavLink>
           ))}
-          <span
-            className="hidden text-caption text-ink-muted/50 lg:inline"
-            aria-hidden
-            title="语言切换（二期）"
+          <button
+            type="button"
+            className="text-caption text-ink-muted transition-colors hover:text-ink"
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            onClick={() => onLangChange(nextLang)}
           >
-            中 / EN
-          </span>
+            <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
+            <span aria-hidden> / </span>
+            <span className={lang === 'en' ? 'text-ink' : undefined}>EN</span>
+          </button>
         </nav>
 
         <button
           type="button"
           className="inline-flex flex-col gap-1.5 md:hidden"
-          aria-label={open ? '关闭菜单' : '打开菜单'}
+          aria-label={open ? closeMenuLabel : openMenuLabel}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
@@ -65,7 +77,7 @@ export function Header({ nav }: HeaderProps) {
       {open && (
         <nav
           className="border-t border-line bg-background px-6 py-6 sm:px-10 md:hidden"
-          aria-label="移动端导航"
+          aria-label={mobileNavLabel}
         >
           <ul className="flex flex-col gap-5">
             {nav.map((item) => (
@@ -75,10 +87,25 @@ export function Header({ nav }: HeaderProps) {
                   className={linkClass}
                   onClick={() => setOpen(false)}
                 >
-                  {t(item.label)}
+                  {t(item.label, lang)}
                 </NavLink>
               </li>
             ))}
+            <li>
+              <button
+                type="button"
+                className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+                aria-label={toggleLabel}
+                onClick={() => {
+                  onLangChange(nextLang)
+                  setOpen(false)
+                }}
+              >
+                <span className={lang === 'zh' ? 'text-ink' : undefined}>中</span>
+                <span aria-hidden> / </span>
+                <span className={lang === 'en' ? 'text-ink' : undefined}>EN</span>
+              </button>
+            </li>
           </ul>
         </nav>
       )}

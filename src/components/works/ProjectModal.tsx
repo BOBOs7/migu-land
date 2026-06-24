@@ -2,7 +2,7 @@ import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { t } from '../../i18n'
-import type { CaseStudy, MediaItem, ModalBlock } from '../../data/types'
+import type { CaseStudy, Lang, MediaItem, ModalBlock } from '../../data/types'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { useElasticOverscroll } from '../../hooks/useElasticOverscroll'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
@@ -16,6 +16,7 @@ type ProjectModalProps = {
   onClose: () => void
   onPrev: () => void
   onNext: () => void
+  lang: Lang
 }
 
 const layoutTransition = {
@@ -80,10 +81,12 @@ function MediaTile({
   item,
   pixelArt,
   square,
+  lang,
 }: {
   item: MediaItem
   pixelArt?: boolean
   square?: boolean
+  lang: Lang
 }) {
   const aspect = square ? 'aspect-square' : 'aspect-video'
   const fit = pixelArt ? 'object-contain' : 'object-cover'
@@ -99,7 +102,7 @@ function MediaTile({
       >
         <img
           src={publicAsset(item.src)}
-          alt={t(item.alt)}
+          alt={t(item.alt, lang)}
           className={`absolute inset-0 h-full w-full ${fit}`}
           style={renderingStyle}
           loading="lazy"
@@ -119,7 +122,7 @@ function MediaTile({
         muted
         playsInline
         preload="metadata"
-        aria-label={t(item.alt)}
+        aria-label={t(item.alt, lang)}
       >
         {item.webm && <source src={publicAsset(item.webm)} type="video/webm" />}
         <source src={publicAsset(item.mp4)} type="video/mp4" />
@@ -128,7 +131,7 @@ function MediaTile({
   )
 }
 
-function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
+function ModalContent({ blocks, lang }: { blocks: ModalBlock[]; lang: Lang }) {
   const firstHeadingIndex = blocks.findIndex((block) => block.type === 'heading')
   const overviewEnd = firstHeadingIndex === -1 ? blocks.length : firstHeadingIndex
 
@@ -138,7 +141,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
         if (block.type === 'heading') {
           return (
             <h3 key={i} className="font-display text-h2 text-ink">
-              {t(block.text)}
+              {t(block.text, lang)}
             </h3>
           )
         }
@@ -150,13 +153,13 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
                 key={i}
                 className="max-w-prose border-l-2 border-line pl-4 text-body italic text-ink-muted"
               >
-                {t(block.text)}
+                {t(block.text, lang)}
               </blockquote>
             )
           }
           return (
             <p key={i} className="max-w-prose text-body text-ink-muted">
-              {t(block.text)}
+              {t(block.text, lang)}
             </p>
           )
         }
@@ -165,7 +168,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
             <div key={i}>
               {block.title && (
                 <h4 className="mb-2 text-sm font-semibold text-ink">
-                  {t(block.title)}
+                  {t(block.title, lang)}
                 </h4>
               )}
               <ul className="space-y-2 text-body text-ink-muted">
@@ -174,7 +177,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
                     <span className="text-accent" aria-hidden>
                       ·
                     </span>
-                    <span>{t(item)}</span>
+                    <span>{t(item, lang)}</span>
                   </li>
                 ))}
               </ul>
@@ -186,7 +189,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
             <img
               key={i}
               src={publicAsset(block.src)}
-              alt={t(block.alt)}
+              alt={t(block.alt, lang)}
               className="w-full rounded-card border border-line"
               loading="lazy"
             />
@@ -194,7 +197,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
         }
         if (block.type === 'video') {
           const embedSrc = getVideoEmbedSrc(block.url)
-          const title = block.caption ? t(block.caption) : 'video'
+          const title = block.caption ? t(block.caption, lang) : 'video'
           return (
             <figure key={i} className="mx-auto w-full">
               <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-card border border-line bg-ink/5">
@@ -221,21 +224,21 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
                       ▶
                     </span>
                     <span className="text-sm font-medium text-accent-strong">
-                      打开视频链接
+                      {lang === 'zh' ? '打开视频链接' : 'Open video link'}
                     </span>
                   </a>
                 )}
               </div>
               {block.caption && (
                 <figcaption className="mt-2 text-center text-caption text-ink-muted">
-                  {t(block.caption)}
+                  {t(block.caption, lang)}
                 </figcaption>
               )}
             </figure>
           )
         }
         if (block.type === 'gallery') {
-          return <Gallery key={i} images={block.images} />
+          return <Gallery key={i} images={block.images} lang={lang} />
         }
         if (block.type === 'mediaGrid') {
           const square = block.layout === 'grid'
@@ -257,7 +260,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
             >
               {block.title && (
                 <h4 className="mb-3 text-sm font-semibold text-ink">
-                  {t(block.title)}
+                  {t(block.title, lang)}
                 </h4>
               )}
               <div className="grid gap-3" style={gridStyle as React.CSSProperties}>
@@ -267,6 +270,7 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
                     item={item}
                     pixelArt={block.pixelArt}
                     square={square}
+                    lang={lang}
                   />
                 ))}
               </div>
@@ -282,10 +286,10 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
               className="inline-flex flex-wrap items-center gap-2 rounded-btn border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink transition active:scale-[0.98] hover:border-ink"
             >
               <span aria-hidden>↓</span>
-              <span>{t(block.label)}</span>
+              <span>{t(block.label, lang)}</span>
               {block.hint && (
                 <span className="text-caption font-normal text-ink-muted">
-                  {t(block.hint)}
+                  {t(block.hint, lang)}
                 </span>
               )}
             </a>
@@ -297,19 +301,19 @@ function ModalContent({ blocks }: { blocks: ModalBlock[] }) {
   )
 }
 
-function ProjectBody({ project }: { project: CaseStudy }) {
+function ProjectBody({ project, lang }: { project: CaseStudy; lang: Lang }) {
   const projectType = project.subtitle
-    ? t(project.subtitle)
-    : t(project.tagLabel)
+    ? t(project.subtitle, lang)
+    : t(project.tagLabel, lang)
         .split('/')
         .map((part) => part.trim())
         .filter(Boolean)
         .join(' · ')
 
   const metaRows = [
-    { label: 'TYPE', value: projectType },
-    { label: 'ROLE', value: t(project.role) },
-    { label: 'PLATFORM', value: t(project.platform) },
+    { label: lang === 'zh' ? '类型' : 'TYPE', value: projectType },
+    { label: lang === 'zh' ? '职责' : 'ROLE', value: t(project.role, lang) },
+    { label: lang === 'zh' ? '平台' : 'PLATFORM', value: t(project.platform, lang) },
   ] as const
 
   return (
@@ -320,7 +324,7 @@ function ProjectBody({ project }: { project: CaseStudy }) {
             id="project-modal-title"
             className="min-w-0 flex-1 break-words font-display text-h2 leading-tight text-ink"
           >
-            {t(project.title)}
+            {t(project.title, lang)}
           </h2>
           <span className="shrink-0 font-display text-h2 leading-tight tabular-nums text-ink-muted">
             {project.year}
@@ -341,7 +345,7 @@ function ProjectBody({ project }: { project: CaseStudy }) {
           ))}
           {project.desensitized && (
             <p className="text-right text-caption text-accent-strong">
-              在研项目，已脱敏
+              {lang === 'zh' ? '在研项目，已脱敏' : 'In-development project, redacted'}
             </p>
           )}
         </div>
@@ -353,13 +357,13 @@ function ProjectBody({ project }: { project: CaseStudy }) {
             rel="noreferrer"
             className="relative mt-5 flex w-full items-center justify-between py-1 text-sm font-semibold text-accent-strong after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform hover:after:scale-x-100"
           >
-            <span>点击前往项目</span>
+            <span>{lang === 'zh' ? '点击前往项目' : 'Visit project'}</span>
             <span aria-hidden>→</span>
           </a>
         )}
       </header>
 
-      <ModalContent blocks={project.modalBlocks} />
+      <ModalContent blocks={project.modalBlocks} lang={lang} />
     </>
   )
 }
@@ -371,6 +375,7 @@ export function ProjectModal({
   onClose,
   onPrev,
   onNext,
+  lang,
 }: ProjectModalProps) {
   const reduced = useReducedMotion()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -439,7 +444,7 @@ export function ProjectModal({
           <button
             type="button"
             className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]"
-            aria-label="关闭弹窗"
+            aria-label={lang === 'zh' ? '关闭弹窗' : 'Close project modal'}
             onClick={onClose}
           />
 
@@ -463,9 +468,9 @@ export function ProjectModal({
                   type="button"
                   onClick={onClose}
                   className="rounded-btn border border-line px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
-                  aria-label="关闭"
+                  aria-label={lang === 'zh' ? '关闭' : 'Close'}
                 >
-                  关闭
+                  {lang === 'zh' ? '关闭' : 'Close'}
                 </button>
               </div>
 
@@ -481,7 +486,7 @@ export function ProjectModal({
                     exit={reduced ? undefined : { opacity: 0 }}
                     transition={{ duration: reduced ? 0 : 0.18 }}
                   >
-                    <ProjectBody project={project} />
+                    <ProjectBody project={project} lang={lang} />
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -493,7 +498,7 @@ export function ProjectModal({
                     onClick={onPrev}
                     className="rounded-btn border border-line px-4 py-2 text-sm font-medium text-ink transition active:scale-[0.98] hover:border-ink"
                   >
-                    上一个
+                    {lang === 'zh' ? '上一个' : 'Previous'}
                   </button>
                   <span className="text-caption text-ink-muted">
                     {activeIndex + 1} / {projects.length}
@@ -503,7 +508,7 @@ export function ProjectModal({
                     onClick={onNext}
                     className="rounded-btn border border-line px-4 py-2 text-sm font-medium text-ink transition active:scale-[0.98] hover:border-ink"
                   >
-                    下一个
+                    {lang === 'zh' ? '下一个' : 'Next'}
                   </button>
                 </div>
               </div>
